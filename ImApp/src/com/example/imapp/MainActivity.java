@@ -6,14 +6,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.quickblox.core.QBCallback;
 import com.quickblox.core.QBCallbackImpl;
 import com.quickblox.core.QBSettings;
 import com.quickblox.core.result.Result;
+import com.quickblox.internal.core.request.QBPagedRequestBuilder;
 import com.quickblox.module.auth.QBAuth;
-import com.quickblox.module.auth.model.QBSession;
 import com.quickblox.module.auth.result.QBSessionResult;
 import com.quickblox.module.chat.QBChatRoom;
 import com.quickblox.module.chat.QBChatService;
@@ -21,24 +22,31 @@ import com.quickblox.module.chat.listeners.ChatMessageListener;
 import com.quickblox.module.chat.listeners.RoomListener;
 import com.quickblox.module.chat.listeners.SessionCallback;
 import com.quickblox.module.chat.smack.SmackAndroid;
+import com.quickblox.module.chat.xmpp.QBPrivateChat;
+import com.quickblox.module.content.QBContent;
+import com.quickblox.module.content.result.QBFilePagedResult;
 import com.quickblox.module.users.QBUsers;
 import com.quickblox.module.users.model.QBUser;
 
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Message;
+
 
 public class MainActivity extends Activity {
+
     SharedPreferences loginpreferences;
     SharedPreferences.Editor loginPrefsEditor;
     QBChatRoom room;
-    QBUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_my);
 
-        
+
+
         SmackAndroid.init(this);
+        QBSettings.getInstance().fastConfigInit("14818","6zTZ8BF4RXVhpNK","SK4GwLAffgDSTd3");
         QBUser user = new QBUser();
         user.setId(1629963);
         user.setPassword("password");
@@ -65,7 +73,7 @@ public class MainActivity extends Activity {
                 }
             }
         });
-// Create 1-1 chat
+        // Create 1-1 chat
         final QBPrivateChat chat = QBChatService.getInstance().createChat();
         chat.addChatMessageListener(new ChatMessageListener() {
             @Override
@@ -90,17 +98,39 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
 
+//        setChat();
+//        loginpreferences = this.getSharedPreferences("ichat", this.MODE_PRIVATE);
+//        autoSignIn();
+//        signUp();
+//        joinRoom();
+//        try {
+//            room.sendMessage("THIS IS A TEST!");
+//        } catch (XMPPException e) {
+//            e.printStackTrace();
+//        }
+    }
 
-      //  setChat();
-      //  loginpreferences = this.getSharedPreferences("ichat", this.MODE_PRIVATE);
-       // autoSignIn();
-       // signUp();
-        //joinRoom();
-        //try {
-         //   room.sendMessage("THIS IS A TEST!");
-        //} catch (XMPPException e) {
-         //   e.printStackTrace();
-        //}
+    private void authorizeApp() {
+        QBUser qbUser = new QBUser("username", "password");
+        // authorize app with default user
+        QBAuth.createSession(qbUser, new QBCallback() {
+            @Override
+            public void onComplete(Result result) {
+                if (result.isSuccess()) {
+                    // return result from QBAuth.authorizeApp() query
+                    QBSessionResult qbSessionResult = (QBSessionResult) result;
+                    DataHolder.getDataHolder().setSignInUserId(qbSessionResult.getSession().getUserId());
+                    // retrieve user's files
+                    getFileList();
+                } else {
+
+                }
+            }
+
+            @Override
+            public void onComplete(Result result, Object o) {
+            }
+        });
     }
 
     public void signUp(){
@@ -109,7 +139,6 @@ public class MainActivity extends Activity {
         //THIS SHOULD OPEN A DIALOG THAT HANDLES THE REST OF THE LOGIC
         loginPrefsEditor.putString("password","password");
         loginPrefsEditor.putString("username","username");
-        
     }
 
     public void autoSignIn(){
@@ -163,7 +192,7 @@ public class MainActivity extends Activity {
 
     private void login(String username, String password) {
         //Create login boxes etc.
-        QBUsers.signIn(username,password,new QBCallback() {
+        QBUsers.signIn("test1","test1pass",new QBCallback() {
             @Override
             public void onComplete(Result result) {
                 if(result.isSuccess())
@@ -184,32 +213,14 @@ public class MainActivity extends Activity {
     }
 
     public void setChat(){
-    	SmackAndroid.init(this);
         QBSettings.getInstance().fastConfigInit("14818","6zTZ8BF4RXVhpNK","SK4GwLAffgDSTd3");
-        QBAuth.createSession(user, new QBCallback() {
+        QBAuth.createSession(new QBCallback() {
             @Override
             public void onComplete(Result result) {
-            	QBSessionResult ress = (QBSessionResult)result;
                 if(result.isSuccess())
                     Toast.makeText(getApplicationContext(),"Session Created",Toast.LENGTH_SHORT).show();
                 else
                     Toast.makeText(getApplicationContext(),"Session Failed",Toast.LENGTH_SHORT).show();
-                user.setId(ress.getSession().getUserId());
-                QBChatService.getInstance().loginWithUser(user, new SessionCallback(){
-
-					@Override
-					public void onLoginError(String arg0) {
-						// TODO Auto-generated method stub
-						Log.d("LOGINERROR","Login Failed");
-					}
-
-					@Override
-					public void onLoginSuccess() {
-						// TODO Auto-generated method stub
-						
-					}
-                	
-                });
             }
 
             @Override
@@ -222,11 +233,33 @@ public class MainActivity extends Activity {
         });
     }
 
+    private void getFileList() {
+        // ================= QuickBlox ===== Step 2 =================
+        // Gey all user's files
+        QBPagedRequestBuilder builder = new QBPagedRequestBuilder();
+        builder.setPerPage(30);
+        builder.setPage(1);
+        QBContent.getFiles(builder, new QBCallback() {
+            @Override
+            public void onComplete(Result result) {
+                QBFilePagedResult qbFilePagedResult = (QBFilePagedResult) result;
+                DataHolder.getDataHolder().setQbFileList(qbFilePagedResult.getFiles());
+                // show activity_gallery
+                Toast.makeText(getApplicationContext(),"Done",Toast.LENGTH_SHORT).show();
+            //    startGalleryActivity();
+            }
+
+            @Override
+            public void onComplete(Result result, Object o) {
+            }
+        });
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.my, menu);
         return true;
     }
 
