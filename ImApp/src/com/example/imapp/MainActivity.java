@@ -52,7 +52,17 @@ public class MainActivity extends Activity {
     }
 
     private void sendMessage() {
-        QBPrivateChat chat = QBChatService.getInstance().createChat();
+        QBPrivateChat chat = QBChatService.getInstance().loginWithUser(user,new SessionCallback() {
+            @Override
+            public void onLoginSuccess() {
+                Toast.makeText(getApplicationContext(),"Success",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onLoginError(String s) {
+                Toast.makeText(getApplicationContext(),"Failure",Toast.LENGTH_SHORT).show();
+            }
+        });
         chat.addChatMessageListener(new ChatMessageListener() {
             @Override
             public void processMessage(Message message) {
