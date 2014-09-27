@@ -3,6 +3,7 @@ package cfg.example.org.cfg;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -12,14 +13,21 @@ import com.quickblox.core.QBCallbackImpl;
 import com.quickblox.core.QBSettings;
 import com.quickblox.core.result.Result;
 import com.quickblox.module.auth.QBAuth;
+import com.quickblox.module.chat.QBChatRoom;
+import com.quickblox.module.chat.QBChatService;
+import com.quickblox.module.chat.listeners.ChatMessageListener;
+import com.quickblox.module.chat.listeners.RoomListener;
 import com.quickblox.module.users.QBUsers;
 import com.quickblox.module.users.model.QBUser;
+
+import org.jivesoftware.smack.XMPPException;
 
 
 public class MyActivity extends Activity {
 
     SharedPreferences loginpreferences;
     SharedPreferences.Editor loginPrefsEditor;
+    QBChatRoom room;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +37,12 @@ public class MyActivity extends Activity {
         loginpreferences = this.getSharedPreferences("ichat", this.MODE_PRIVATE);
         autoSignIn();
         signUp();
+        joinRoom();
+        try {
+            room.sendMessage("THIS IS A TEST!");
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        }
     }
 
     public void signUp(){
@@ -45,6 +59,47 @@ public class MyActivity extends Activity {
         }
     }
 
+    //unfinished, find appropriate replacement for this
+    //doesnt work at all actually, fix much later
+//    public void createRoom(){
+//        QBChatService.getInstance().createRoom("testname", false/*what*/,true/*what*/, new RoomListener() {
+//            @Override
+//            public void onCreatedRoom(QBChatRoom qbChatRoom) {
+//                qbChatRoom.addMessageListener(this);
+//            }
+//
+//            @Override
+//            public void onJoinedRoom(QBChatRoom qbChatRoom) {
+//
+//            }
+//
+//            @Override
+//            public void onError(String s) {
+//
+//            }
+//        });
+//    }
+
+    //Make this modular so it auto-joins appropriate room
+    public void joinRoom(){
+        room = QBChatService.getInstance().joinRoom("test", new RoomListener() {
+            @Override
+            public void onCreatedRoom(QBChatRoom qbChatRoom) {
+                Log.d("TAG", "Room Created");
+                room.setRoomListener(this);
+            }
+
+            @Override
+            public void onJoinedRoom(QBChatRoom qbChatRoom) {
+                room.setRoomListener(this);
+            }
+
+            @Override
+            public void onError(String s) {
+
+            }
+        });
+    }
 
 
     private void login(String username, String password) {
