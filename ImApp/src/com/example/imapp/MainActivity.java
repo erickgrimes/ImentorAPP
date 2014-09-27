@@ -47,67 +47,9 @@ public class MainActivity extends Activity {
 
         SmackAndroid.init(this);
         QBSettings.getInstance().fastConfigInit("14818","6zTZ8BF4RXVhpNK","SK4GwLAffgDSTd3");
-        QBUser user = new QBUser();
-        user.setId(1629963);
-        user.setPassword("password");
-        final QBUser user1 = user;
-        QBAuth.createSession(user,new QBCallbackImpl(){
-            @Override
-            public void onComplete(Result result) {
-                if (result.isSuccess()) {
-                    QBSessionResult res = (QBSessionResult)result;
-                    user1.setId(res.getSession().getUserId());
-                    //
-                    QBChatService.getInstance().loginWithUser(user1, new SessionCallback() {
-                        @Override
-                        public void onLoginSuccess() {
-                            Toast.makeText(getApplicationContext(),"Success",Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onLoginError(String s) {
-                            Toast.makeText(getApplicationContext(),s,Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else {
-                }
-            }
-        });
-        // Create 1-1 chat
-        final QBPrivateChat chat = QBChatService.getInstance().createChat();
-        chat.addChatMessageListener(new ChatMessageListener() {
-            @Override
-            public void processMessage(Message message) {
-            }
-
-            @Override
-            public boolean accept(Message.Type type) {
-                switch (1) {
-                    case 1:
-                        return true; // process 1-1 chat messages
-                    default:
-                        return false;
-                }
-            }
-        });
-
-// send message
-        try {
-            chat.sendMessage(1630100, "Hi mate!");
-        } catch (XMPPException e) {
-            e.printStackTrace();
-        }
-
-//        setChat();
-//        loginpreferences = this.getSharedPreferences("ichat", this.MODE_PRIVATE);
-//        autoSignIn();
-//        signUp();
-//        joinRoom();
-//        try {
-//            room.sendMessage("THIS IS A TEST!");
-//        } catch (XMPPException e) {
-//            e.printStackTrace();
-//        }
+        SmackAndroid.init(this);
+        QBSettings.getInstance().fastConfigInit("14818","6zTZ8BF4RXVhpNK","SK4GwLAffgDSTd3");
+        authorizeApp();
     }
 
     private void authorizeApp() {
