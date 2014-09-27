@@ -12,10 +12,21 @@ import java.util.Map;
 public class Aggregator {
 	
 	private final static String bannedWordFileName = "badwords.txt";
-	List<String> bannedWords;
+	private List<String> bannedWords;
+	private FileTransferComponent ftp;
 	
-	public Aggregator(){
+	public Aggregator(FileTransferComponent ftp){
+		this.ftp = ftp;
 		bannedWords = loadFile(bannedWordFileName);
+	}
+	
+	public int getNumberOfBannedWordsForMentor(String mentorName){
+		List<String> inputFile = ftp.pullLogsForMentor(mentorName);
+		return getNumberOfBannedWords(inputFile);
+	}
+	public Map<Tag,Integer> getFrequencyOfTagsForMentor(String mentorName){
+		List<String> inputFile = ftp.pullLogsForMentor(mentorName);
+		return generateTagMapFromFile(inputFile);
 	}
 	
 	private Map<Tag,Integer> updateTagMapWithString(String inputString, Map<Tag,Integer> tagMap){
@@ -35,7 +46,7 @@ public class Aggregator {
 		return tagMap;
 	}
 	
-	public Map<Tag,Integer> generateTagMapFromFile(List<String> inputFile){
+	private Map<Tag,Integer> generateTagMapFromFile(List<String> inputFile){
 		Map<Tag,Integer> tagMap = new HashMap<Tag,Integer>();
 		for(String thisString:inputFile){
 			tagMap = updateTagMapWithString(thisString, tagMap);
@@ -54,7 +65,7 @@ public class Aggregator {
 		return count;
 	}
 	
-	public int getNumberOfBannedWords(List<String> inputFile){
+	private int getNumberOfBannedWords(List<String> inputFile){
 		int count = 0;
 		for(String thisLine:inputFile){
 			count+=getNumberOfBannedWordsInLine(thisLine);
