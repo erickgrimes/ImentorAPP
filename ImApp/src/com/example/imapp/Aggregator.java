@@ -12,19 +12,20 @@ import java.util.Map;
 public class Aggregator {
 	
 	private final static String bannedWordFileName = "badwords.txt";
-	List<String> bannedWords;
-	//add FTP component here
+	private List<String> bannedWords;
+	private FileTransferComponent ftp;
 	
-	public Aggregator(){ //add FTP component to constructor
+	public Aggregator(FileTransferComponent ftp){
+		this.ftp = ftp;
 		bannedWords = loadFile(bannedWordFileName);
 	}
 	
 	public int getNumberOfBannedWordsForMentor(String mentorName){
-		List<String> inputFile = null; //load from FTP component;
+		List<String> inputFile = ftp.pullLogsForMentor(mentorName);
 		return getNumberOfBannedWords(inputFile);
 	}
 	public Map<Tag,Integer> getFrequencyOfTagsForMentor(String mentorName){
-		List<String> inputFile = null; //load from FTP component
+		List<String> inputFile = ftp.pullLogsForMentor(mentorName);
 		return generateTagMapFromFile(inputFile);
 	}
 	
