@@ -65,6 +65,32 @@ public class MainActivity extends Activity {
                 }
             }
         });
+// Create 1-1 chat
+        final QBPrivateChat chat = QBChatService.getInstance().createChat();
+        chat.addChatMessageListener(new ChatMessageListener() {
+            @Override
+            public void processMessage(Message message) {
+            }
+
+            @Override
+            public boolean accept(Message.Type type) {
+                switch (1) {
+                    case 1:
+                        return true; // process 1-1 chat messages
+                    default:
+                        return false;
+                }
+            }
+        });
+
+// send message
+        try {
+            chat.sendMessage(1630100, "Hi mate!");
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        }
+
+
       //  setChat();
       //  loginpreferences = this.getSharedPreferences("ichat", this.MODE_PRIVATE);
        // autoSignIn();
