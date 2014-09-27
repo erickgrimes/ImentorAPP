@@ -39,35 +39,32 @@ public class MainActivity extends Activity {
 
         
         SmackAndroid.init(this);
-        final QBUser user = new QBUser("username","password");    
-        QBAuth.createSession(user, new QBCallbackImpl(){
-        	@Override
-        	public void onComplete(Result result){
-        		if(result.isSuccess()){
-        			QBSessionResult res = (QBSessionResult)result;
-        			user.setId(res.getSession().getUserId());
-        		}
-        	}
+        QBUser user = new QBUser();
+        user.setId(1629963);
+        user.setPassword("password");
+        final QBUser user1 = user;
+        QBAuth.createSession(user,new QBCallbackImpl(){
+            @Override
+            public void onComplete(Result result) {
+                if (result.isSuccess()) {
+                    QBSessionResult res = (QBSessionResult)result;
+                    user1.setId(res.getSession().getUserId());
+                    //
+                    QBChatService.getInstance().loginWithUser(user1, new SessionCallback() {
+                        @Override
+                        public void onLoginSuccess() {
+                            Toast.makeText(getApplicationContext(),"Success",Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onLoginError(String s) {
+                            Toast.makeText(getApplicationContext(),s,Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                }
+            }
         });
-        QBChatService.getInstance().joinRoom("test", new RoomListener() {
-			
-			@Override
-			public void onJoinedRoom(QBChatRoom arg0) {
-				// TODO Auto-generated method stub
-			}
-			
-			@Override
-			public void onError(String arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void onCreatedRoom(QBChatRoom arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
       //  setChat();
       //  loginpreferences = this.getSharedPreferences("ichat", this.MODE_PRIVATE);
        // autoSignIn();
