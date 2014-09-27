@@ -1,4 +1,4 @@
-package com.example.imapp;
+package cfg.example.org.cfg;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -47,13 +47,38 @@ public class MainActivity extends Activity {
 
         SmackAndroid.init(this);
         QBSettings.getInstance().fastConfigInit("14818","6zTZ8BF4RXVhpNK","SK4GwLAffgDSTd3");
-        SmackAndroid.init(this);
-        QBSettings.getInstance().fastConfigInit("14818","6zTZ8BF4RXVhpNK","SK4GwLAffgDSTd3");
         authorizeApp();
+        sendMessage();
+    }
+
+    private void sendMessage() {
+        QBPrivateChat chat = QBChatService.getInstance().createChat();
+        chat.addChatMessageListener(new ChatMessageListener() {
+            @Override
+            public void processMessage(Message message) {
+            }
+
+            @Override
+            public boolean accept(Message.Type type) {
+                switch (1) {
+                    case 1:
+                        return true; // process 1-1 chat messages
+                    default:
+                        return false;
+                }
+            }
+        });
+
+// send message
+        try {
+            chat.sendMessage(1630100, "Hi mate!");
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        }
     }
 
     private void authorizeApp() {
-        QBUser qbUser = new QBUser("username-config@gmail.com", "password");
+        QBUser qbUser = new QBUser("username", "password");
         // authorize app with default user
         QBAuth.createSession(qbUser, new QBCallback() {
             @Override
