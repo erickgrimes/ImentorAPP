@@ -1,4 +1,4 @@
-package cfg.example.org.cfg;
+package com.example.imapp;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -13,36 +13,71 @@ import com.quickblox.core.QBCallbackImpl;
 import com.quickblox.core.QBSettings;
 import com.quickblox.core.result.Result;
 import com.quickblox.module.auth.QBAuth;
+import com.quickblox.module.auth.model.QBSession;
+import com.quickblox.module.auth.result.QBSessionResult;
 import com.quickblox.module.chat.QBChatRoom;
 import com.quickblox.module.chat.QBChatService;
 import com.quickblox.module.chat.listeners.ChatMessageListener;
 import com.quickblox.module.chat.listeners.RoomListener;
+import com.quickblox.module.chat.listeners.SessionCallback;
+import com.quickblox.module.chat.smack.SmackAndroid;
 import com.quickblox.module.users.QBUsers;
 import com.quickblox.module.users.model.QBUser;
 
 import org.jivesoftware.smack.XMPPException;
 
-
-public class MyActivity extends Activity {
-
+public class MainActivity extends Activity {
     SharedPreferences loginpreferences;
     SharedPreferences.Editor loginPrefsEditor;
     QBChatRoom room;
+    QBUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my);
-        setChat();
-        loginpreferences = this.getSharedPreferences("ichat", this.MODE_PRIVATE);
-        autoSignIn();
-        signUp();
-        joinRoom();
-        try {
-            room.sendMessage("THIS IS A TEST!");
-        } catch (XMPPException e) {
-            e.printStackTrace();
-        }
+        setContentView(R.layout.activity_main);
+
+        
+        SmackAndroid.init(this);
+        final QBUser user = new QBUser("username","password");    
+        QBAuth.createSession(user, new QBCallbackImpl(){
+        	@Override
+        	public void onComplete(Result result){
+        		if(result.isSuccess()){
+        			QBSessionResult res = (QBSessionResult)result;
+        			user.setId(res.getSession().getUserId());
+        		}
+        	}
+        });
+        QBChatService.getInstance().joinRoom("test", new RoomListener() {
+			
+			@Override
+			public void onJoinedRoom(QBChatRoom arg0) {
+				// TODO Auto-generated method stub
+			}
+			
+			@Override
+			public void onError(String arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onCreatedRoom(QBChatRoom arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+      //  setChat();
+      //  loginpreferences = this.getSharedPreferences("ichat", this.MODE_PRIVATE);
+       // autoSignIn();
+       // signUp();
+        //joinRoom();
+        //try {
+         //   room.sendMessage("THIS IS A TEST!");
+        //} catch (XMPPException e) {
+         //   e.printStackTrace();
+        //}
     }
 
     public void signUp(){
@@ -51,6 +86,7 @@ public class MyActivity extends Activity {
         //THIS SHOULD OPEN A DIALOG THAT HANDLES THE REST OF THE LOGIC
         loginPrefsEditor.putString("password","password");
         loginPrefsEditor.putString("username","username");
+        
     }
 
     public void autoSignIn(){
@@ -104,7 +140,7 @@ public class MyActivity extends Activity {
 
     private void login(String username, String password) {
         //Create login boxes etc.
-        QBUsers.signIn("test1","test1pass",new QBCallback() {
+        QBUsers.signIn(username,password,new QBCallback() {
             @Override
             public void onComplete(Result result) {
                 if(result.isSuccess())
@@ -125,14 +161,32 @@ public class MyActivity extends Activity {
     }
 
     public void setChat(){
+    	SmackAndroid.init(this);
         QBSettings.getInstance().fastConfigInit("14818","6zTZ8BF4RXVhpNK","SK4GwLAffgDSTd3");
-        QBAuth.createSession(new QBCallback() {
+        QBAuth.createSession(user, new QBCallback() {
             @Override
             public void onComplete(Result result) {
+            	QBSessionResult ress = (QBSessionResult)result;
                 if(result.isSuccess())
                     Toast.makeText(getApplicationContext(),"Session Created",Toast.LENGTH_SHORT).show();
                 else
                     Toast.makeText(getApplicationContext(),"Session Failed",Toast.LENGTH_SHORT).show();
+                user.setId(ress.getSession().getUserId());
+                QBChatService.getInstance().loginWithUser(user, new SessionCallback(){
+
+					@Override
+					public void onLoginError(String arg0) {
+						// TODO Auto-generated method stub
+						Log.d("LOGINERROR","Login Failed");
+					}
+
+					@Override
+					public void onLoginSuccess() {
+						// TODO Auto-generated method stub
+						
+					}
+                	
+                });
             }
 
             @Override
@@ -149,7 +203,7 @@ public class MyActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.my, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
