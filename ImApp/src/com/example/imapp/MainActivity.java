@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my);
+        setContentView(R.layout.activity_main);
 
 
 
@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
     }
 
     private void authorizeApp() {
-        QBUser qbUser = new QBUser("username", "password");
+        QBUser qbUser = new QBUser("username-config@gmail.com", "password");
         // authorize app with default user
         QBAuth.createSession(qbUser, new QBCallback() {
             @Override
@@ -201,7 +201,7 @@ public class MainActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.my, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 

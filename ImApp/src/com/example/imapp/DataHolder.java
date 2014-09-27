@@ -1,4 +1,4 @@
-package cfg.example.org.cfg;
+package com.example.imapp;
 
 import com.quickblox.module.content.model.QBFile;
 
